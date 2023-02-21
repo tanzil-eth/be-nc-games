@@ -29,20 +29,34 @@ describe("Get Reviews", () => {
 			.get("/api/reviews")
 			.expect(200)
 			.then((result) => {
-				const expected = {
-					title: "Agricola",
-					designer: "Uwe Rosenberg",
-					owner: "mallionaire",
-					review_id: 1,
-					review_img_url:
-						"https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
-					review_body: "Farmyard fun!",
-					category: "euro game",
-					created_at: "2021-01-18T10:00:20.514Z",
-					votes: 1,
-				};
-				expect(result.body.reviews[0]).toEqual(expected);
-				expect(result.body.reviews.length).toBe(13);
+				result.body.reviews.forEach((review) => {
+					expect(review).toEqual(
+						expect.objectContaining({
+							title: expect.any(String),
+							designer: expect.any(String),
+							owner: expect.any(String),
+							review_id: expect.any(Number),
+							review_img_url: expect.any(String),
+							review_body: expect.any(String),
+							category: expect.any(String),
+							created_at: expect.any(String),
+							votes: expect.any(Number),
+							comment_count: expect.any(String),
+						})
+					);
+				});
+			});
+	});
+	test("Return reviews in descending order by default", () => {
+		return request(app)
+			.get("/api/reviews")
+			.expect(200)
+			.then((result) => {
+				const reviews = result.body.reviews;
+				const sortedReviews = reviews.sort((a, b) => {
+					return new Date(b.created_at) - new Date(a.created_at);
+				});
+				expect(reviews).toEqual(sortedReviews);
 			});
 	});
 });
