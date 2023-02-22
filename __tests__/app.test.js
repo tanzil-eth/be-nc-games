@@ -1,3 +1,4 @@
+require("jest-sorted");
 const request = require("supertest");
 const db = require("../db/connection.js");
 const testData = require("../db/data/test-data/index.js");
@@ -41,7 +42,7 @@ describe("Get Reviews", () => {
 							category: expect.any(String),
 							created_at: expect.any(String),
 							votes: expect.any(Number),
-							comment_count: expect.any(String),
+							comment_count: expect.any(Number),
 						})
 					);
 				});
@@ -53,10 +54,9 @@ describe("Get Reviews", () => {
 			.expect(200)
 			.then((result) => {
 				const reviews = result.body.reviews;
-				const sortedReviews = reviews.sort((a, b) => {
-					return new Date(b.created_at) - new Date(a.created_at);
+				expect(reviews).toBeSortedBy("created_at", {
+					descending: true,
 				});
-				expect(reviews).toEqual(sortedReviews);
 			});
 	});
 });
