@@ -67,7 +67,7 @@ describe("Get Review By ID", () => {
 			.get("/api/reviews/5")
 			.expect(200)
 			.then((result) => {
-				const review = result.body;
+				const review = result.body.review;
 				expect(review).toEqual(
 					expect.objectContaining({
 						title: expect.any(String),
