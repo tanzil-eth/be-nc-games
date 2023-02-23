@@ -73,7 +73,7 @@ describe("Get Review By ID", () => {
 						title: expect.any(String),
 						designer: expect.any(String),
 						owner: expect.any(String),
-						review_id: expect.any(Number),
+						review_id: 5,
 						review_img_url: expect.any(String),
 						review_body: expect.any(String),
 						category: expect.any(String),
