@@ -60,3 +60,46 @@ describe("Get Reviews", () => {
 			});
 	});
 });
+
+describe("Get Review By ID", () => {
+	test("Return selected review and a status code 200", () => {
+		return request(app)
+			.get("/api/reviews/5")
+			.expect(200)
+			.then((result) => {
+				const review = result.body.review;
+				expect(review).toEqual(
+					expect.objectContaining({
+						title: expect.any(String),
+						designer: expect.any(String),
+						owner: expect.any(String),
+						review_id: 5,
+						review_img_url: expect.any(String),
+						review_body: expect.any(String),
+						category: expect.any(String),
+						created_at: expect.any(String),
+						votes: expect.any(Number),
+					})
+				);
+			});
+	});
+	test("Responds with 404 error when applicable", () => {
+		return request(app)
+			.get("/api/reviews/999")
+			.expect(404)
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Resource not found");
+			});
+	});
+
+	test("Responds with 400 error when applicable", () => {
+		return request(app)
+			.get("/api/reviews/banana")
+			.expect(400)
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Bad request");
+			});
+	});
+});
