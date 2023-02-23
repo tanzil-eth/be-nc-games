@@ -14,4 +14,18 @@ selectReviews = () => {
 		});
 };
 
-module.exports = selectReviews;
+selectReviewById = (reviewId) => {
+	return db
+		.query(`SELECT * FROM reviews WHERE review_id = $1;`, [reviewId])
+		.then((result) => {
+			const review = result.rows[0];
+			if (!review) {
+				return Promise.reject({
+					status: 404,
+				});
+			}
+			return review;
+		});
+};
+
+module.exports = { selectReviews, selectReviewById };
