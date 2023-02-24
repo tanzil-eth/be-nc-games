@@ -111,6 +111,7 @@ describe("Get Comments By Review ID", () => {
 			.expect(200)
 			.then((result) => {
 				const comments = result.body.comments;
+				expect(comments.length).toBeGreaterThan(0);
 				comments.forEach((comment) => {
 					expect(comment).toMatchObject({
 						comment_id: expect.any(Number),
