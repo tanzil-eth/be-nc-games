@@ -28,4 +28,15 @@ selectReviewById = (reviewId) => {
 		});
 };
 
-module.exports = { selectReviews, selectReviewById };
+selectCommentsByReviewId = (reviewId) => {
+	return db
+		.query(
+			`SELECT * FROM comments WHERE review_id = $1 ORDER BY created_at DESC`,
+			[reviewId]
+		)
+		.then((response) => {
+			return response.rows;
+		});
+};
+
+module.exports = { selectReviews, selectReviewById, selectCommentsByReviewId };

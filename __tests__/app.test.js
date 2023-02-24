@@ -103,3 +103,56 @@ describe("Get Review By ID", () => {
 			});
 	});
 });
+
+describe("Get Comments By Review ID", () => {
+	test("Return an array of comments and a status code 200", () => {
+		return request(app)
+			.get("/api/reviews/1/comments")
+			.expect(200)
+			.then((result) => {
+				const comments = result.body.comments;
+				comments.forEach((comment) => {
+					expect(comment).toMatchObject({
+						comment_id: expect.any(Number),
+						created_at: expect.any(String),
+						votes: expect.any(Number),
+						author: expect.any(String),
+						body: expect.any(String),
+						review_id: 1,
+					});
+				});
+			});
+	});
+
+	test("Return comments in date descending order by default", () => {
+		return request(app)
+			.get("/api/reviews/1/comments")
+			.expect(200)
+			.then((result) => {
+				const comments = result.body.comments;
+				expect(comments).toBeSortedBy("created_at", {
+					descending: true,
+				});
+			});
+	});
+
+	test("Responds with 404 error when applicable", () => {
+		return request(app)
+			.get("/api/reviews/999")
+			.expect(404)
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Resource not found");
+			});
+	});
+
+	test("Responds with 400 error when applicable", () => {
+		return request(app)
+			.get("/api/reviews/banana")
+			.expect(400)
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Bad request");
+			});
+	});
+});
