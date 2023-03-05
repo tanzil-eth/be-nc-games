@@ -1,5 +1,5 @@
 handleErrors = (error, request, response, next) => {
-	if (error.status === 404) {
+	if (error.status === 404 || error.code === "23503") {
 		response.status(404).send({ msg: "Resource not found" });
 	} else if (error.status === 400 || error.code === "22P02") {
 		response.status(400).send({ msg: "Bad request" });

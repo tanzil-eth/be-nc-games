@@ -156,3 +156,111 @@ describe("Get Comments By Review ID", () => {
 			});
 	});
 });
+
+describe("POST Comment by Review ID", () => {
+	test("Returns posted comment and status code 201", () => {
+		const newComment = {
+			body: "Safe to say that it's fun for the whole family!",
+			username: "bainesface",
+		};
+		return request(app)
+			.post("/api/reviews/2/comments")
+			.send(newComment)
+			.expect(201)
+			.then((response) => {
+				const postComment = response.body.comment;
+				expect(postComment).toEqual(
+					expect.objectContaining({
+						author: "bainesface",
+						body: "Safe to say that it's fun for the whole family!",
+						comment_id: expect.any(Number),
+						review_id: 2,
+						votes: 0,
+					})
+				);
+			});
+	});
+
+	test("Returns posted comment, disregarding extra information, and status code 201", () => {
+		const newComment = {
+			body: "Here is a photo of my dog!",
+			username: "mallionaire",
+			img_url:
+				"https://images.pexels.com/photos/3687770/pexels-photo-3687770.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		};
+		return request(app)
+			.post("/api/reviews/2/comments")
+			.send(newComment)
+			.expect(201)
+			.then((result) => {
+				const postComment = result.body.comment;
+				expect(postComment).toEqual(
+					expect.objectContaining({
+						author: "mallionaire",
+						body: "Here is a photo of my dog!",
+						comment_id: expect.any(Number),
+						review_id: 2,
+						votes: 0,
+					})
+				);
+			});
+	});
+
+	test("Returns resource not found error when sending to review_id that doesn't exist, and status code of 404", () => {
+		const newComment = {
+			body: "This game is so much fun!",
+			username: "philippaclaire9",
+		};
+		return request(app)
+			.post("/api/reviews/1000/comments")
+			.send(newComment)
+			.expect(404)
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Resource not found");
+			});
+	});
+
+	test("Returns resource not found error when posting with a username that doesn't exist, and status code of 404", () => {
+		const newComment = {
+			username: "spiderman123",
+			body: "Incredibly fun!",
+		};
+		return request(app)
+			.post("/api/reviews/1/comments")
+			.send(newComment)
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Resource not found");
+			});
+	});
+
+	test("Returns bad request error when attempting to post without correct information in required fields, and a status code of 400 ", () => {
+		const newComment = {
+			img_url:
+				"https://images.pexels.com/photos/3687770/pexels-photo-3687770.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		};
+		return request(app)
+			.post("/api/reviews/1/comments")
+			.send(newComment)
+			.expect(400)
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Bad request");
+			});
+	});
+	test("Returns bad request error when given a id that is not a number, and a status code of 400", () => {
+		const newComment = {
+			body: "cool!",
+			username: "philippaclaire9",
+		};
+		return request(app)
+			.post("/api/reviews/banana/comments")
+			.send(newComment)
+			.expect(400)
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Bad request");
+			});
+	});
+});
