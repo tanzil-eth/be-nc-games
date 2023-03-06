@@ -39,4 +39,35 @@ selectCommentsByReviewId = (reviewId) => {
 		});
 };
 
-module.exports = { selectReviews, selectReviewById, selectCommentsByReviewId };
+addComment = (newComment, reviewId) => {
+	if (!reviewId) {
+		return Promise.reject({
+			status: 404,
+		});
+	}
+	if (!newComment.body || !newComment.username) {
+		return Promise.reject({
+			status: 400,
+		});
+	}
+	return db
+		.query(
+			`INSERT INTO comments
+			(body, author, review_id )
+			VALUES
+			($1, $2, $3)
+			RETURNING *;`,
+			[newComment.body, newComment.username, reviewId]
+		)
+		.then(({ rows }) => {
+			const postedComment = rows[0];
+			return postedComment;
+		});
+};
+
+module.exports = {
+	selectReviews,
+	selectReviewById,
+	selectCommentsByReviewId,
+	addComment,
+};
