@@ -230,8 +230,9 @@ describe("POST Comment by Review ID", () => {
 			.post("/api/reviews/1/comments")
 			.send(newComment)
 			.expect(404)
-			.then(({ body }) => {
-				expect(body.msg).toBe("Resource not found");
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Resource not found");
 			});
 	});
 
@@ -257,6 +258,129 @@ describe("POST Comment by Review ID", () => {
 		return request(app)
 			.post("/api/reviews/banana/comments")
 			.send(newComment)
+			.expect(400)
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Bad request");
+			});
+	});
+});
+
+describe("PATCH review by review_id", () => {
+	test("Responds with the updated review, and a status code of 200", () => {
+		const voteIncrement = { inc_votes: 1 };
+		return request(app)
+			.patch("/api/reviews/1")
+			.send(voteIncrement)
+			.expect(200)
+			.then(({ body }) => {
+				expect(body).toEqual(
+					expect.objectContaining({
+						title: "Agricola",
+						designer: "Uwe Rosenberg",
+						owner: "mallionaire",
+						review_img_url:
+							"https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
+						review_body: "Farmyard fun!",
+						category: "euro game",
+						created_at: "2021-01-18T10:00:20.514Z",
+						votes: 2,
+					})
+				);
+			});
+	});
+
+	test("Responds with decreased vote count from a negative increment, and a status code of 200", () => {
+		const voteIncrement = { inc_votes: -1 };
+		return request(app)
+			.patch("/api/reviews/1")
+			.send(voteIncrement)
+			.expect(200)
+			.then(({ body }) => {
+				expect(body).toEqual(
+					expect.objectContaining({
+						title: "Agricola",
+						designer: "Uwe Rosenberg",
+						owner: "mallionaire",
+						review_img_url:
+							"https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
+						review_body: "Farmyard fun!",
+						category: "euro game",
+						created_at: "2021-01-18T10:00:20.514Z",
+						votes: 0,
+					})
+				);
+			});
+	});
+
+	test("Responds with incremented votes whilst ignoring all extra keys, and a status code of 200 ", () => {
+		const voteIncrement = {
+			inc_votes: 10,
+			fav_fruit: "banana",
+			fav_drink: "pepsi",
+		};
+		return request(app)
+			.patch("/api/reviews/1")
+			.send(voteIncrement)
+			.expect(200)
+			.then(({ body }) => {
+				expect(body).toEqual(
+					expect.objectContaining({
+						title: "Agricola",
+						designer: "Uwe Rosenberg",
+						owner: "mallionaire",
+						review_img_url:
+							"https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
+						review_body: "Farmyard fun!",
+						category: "euro game",
+						created_at: "2021-01-18T10:00:20.514Z",
+						votes: 11,
+					})
+				);
+			});
+	});
+
+	test("Returns resource not found error when sending to review_id that doesn't exist, and status code of 404", () => {
+		const voteIncrement = { inc_votes: 1 };
+		return request(app)
+			.patch("/api/reviews/1010")
+			.send(voteIncrement)
+			.expect(404)
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Resource not found");
+			});
+	});
+
+	test("Returns bad request error when sending to review_id that is not a number, and status code of 400", () => {
+		const voteIncrement = { inc_votes: 10 };
+		return request(app)
+			.patch("/api/reviews/banana")
+			.send(voteIncrement)
+			.expect(400)
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Bad request");
+			});
+	});
+
+	test("Returns bad request error when not sending a valid integer as the inc_votes property, and status code of 400", () => {
+		const voteIncrement = { inc_votes: null };
+		return request(app)
+			.patch("/api/reviews/1")
+			.send(voteIncrement)
+			.expect(400)
+			.then((response) => {
+				const errorMessage = response.body.msg;
+				expect(errorMessage).toBe("Bad request");
+			});
+	});
+
+	test("Returns bad request error when not sending an inc_votes key, and status code of 400", () => {
+		const voteIncrement = { fav_fruit: "banana" };
+		return request(app)
+			.patch("/api/reviews/1")
+			.send(voteIncrement)
 			.expect(400)
 			.then((response) => {
 				const errorMessage = response.body.msg;

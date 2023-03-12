@@ -39,7 +39,7 @@ selectCommentsByReviewId = (reviewId) => {
 		});
 };
 
-addComment = (newComment, reviewId) => {
+addCommentById = (newComment, reviewId) => {
 	if (!reviewId) {
 		return Promise.reject({
 			status: 404,
@@ -65,9 +65,31 @@ addComment = (newComment, reviewId) => {
 		});
 };
 
+updateReviewById = (reviewId, votesInc) => {
+	if (!votesInc) {
+		return Promise.reject({ status: 400 });
+	}
+	return db
+		.query(
+			`UPDATE reviews
+		SET votes = votes + $1
+		WHERE review_id = $2
+		RETURNING *`,
+			[votesInc, reviewId]
+		)
+		.then(({ rows }) => {
+			if (!rows.length) {
+				return Promise.reject({ status: 404 });
+			} else {
+				return rows[0];
+			}
+		});
+};
+
 module.exports = {
 	selectReviews,
 	selectReviewById,
 	selectCommentsByReviewId,
-	addComment,
+	addCommentById,
+	updateReviewById,
 };

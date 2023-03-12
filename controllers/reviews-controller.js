@@ -2,7 +2,8 @@ const {
 	selectReviews,
 	selectReviewById,
 	selectCommentsByReviewId,
-	addComment,
+	addCommentById,
+	updateReviewById,
 } = require("../models/reviews-models");
 
 getReviews = (request, response, next) => {
@@ -35,12 +36,25 @@ getCommentsByReviewId = (request, response, next) => {
 		});
 };
 
-postComment = (request, response, next) => {
+postCommentById = (request, response, next) => {
 	const newComment = request.body;
 	const { review_id } = request.params;
-	addComment(newComment, review_id)
+	addCommentById(newComment, review_id)
 		.then((postedComment) => {
 			response.status(201).send({ comment: postedComment });
+		})
+		.catch((err) => {
+			next(err);
+		});
+};
+
+patchReviewById = (request, response, next) => {
+	const { review_id } = request.params;
+	const { inc_votes } = request.body;
+
+	updateReviewById(review_id, inc_votes)
+		.then((updatedReview) => {
+			response.status(200).send(updatedReview);
 		})
 		.catch((err) => {
 			next(err);
@@ -51,5 +65,6 @@ module.exports = {
 	getReviews,
 	getReviewById,
 	getCommentsByReviewId,
-	postComment,
+	postCommentById,
+	patchReviewById,
 };
